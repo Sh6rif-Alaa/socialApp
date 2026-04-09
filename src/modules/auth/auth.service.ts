@@ -1,19 +1,19 @@
 import type { NextFunction, Request, Response } from "express";
 import successResponse from "../../common/utils/response.success";
-import { ISignIn, ISignUp } from "./auth.validation";
 import userModel, { IUser } from "../../DB/models/user.model";
 import { Model } from "mongoose";
 import { AppError } from "../../common/utils/globalErrorHandler";
 import { Compare, Hash } from "../../common/utils/security/hash.security";
 import { encrypt } from "../../common/utils/security/encrypt.security";
 import * as db_service from '../../DB/db.service'
+import { signUpType, signInType } from "./auto.dto";
 
 class AuthService {
     private readonly _userModel: Model<IUser> = userModel
     constructor() { }
 
     signUp = async (req: Request, res: Response, _next: NextFunction) => {
-        const { userName, email, password, age, gender, phone, address }: ISignUp = req.body
+        const { userName, email, password, age, gender, phone, address }: signUpType = req.body
         const userExist = await db_service.findOne({
             filter: { email },
             model: this._userModel
@@ -31,7 +31,7 @@ class AuthService {
     }
 
     signIn = async (req: Request, res: Response, _next: NextFunction) => {
-        const { email, password }: ISignIn = req.body
+        const { email, password }: signInType = req.body
         const user = await db_service.findOne({
             filter: { email },
             model: this._userModel
