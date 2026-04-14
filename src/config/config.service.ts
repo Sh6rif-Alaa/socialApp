@@ -13,6 +13,9 @@ const env = {
     ENCRYPT_ALGORITHM: process.env.ENCRYPT_ALGORITHM!,
     SALT_ROUNDS: process.env.SALT_ROUNDS!,
     PREFIX: process.env.PREFIX!,
+    EMAIL: process.env.EMAIL!,
+    PASSWORD: process.env.PASSWORD!,
+    REDIS_URL: process.env.REDIS_URL!
 }
 
 export default env

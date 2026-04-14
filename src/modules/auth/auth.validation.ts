@@ -8,7 +8,7 @@ export const signUpSchemaBody = z.object({
     cPassword: z.string().min(6, 'confirmPassword must be at least 6 characters long'),
     email: z.email(),
     age: z.number().min(16, 'age must be at least 16 years old').max(80, 'age must be at most 80 years old'),
-    gender: z.enum(Object.values(GenderEnum)).default(GenderEnum.male),
+    gender: z.enum(GenderEnum).default(GenderEnum.male),
     phone: z.string().min(10, 'phone must be at least 10 digits long').max(15, 'phone must be at most 15 digits long').optional(),
     address: z.string().min(10, 'address must be at least 10 characters long').max(100, 'address must be at most 100 characters long').optional(),
 })
@@ -18,9 +18,7 @@ const signInSchemaRefined = signUpSchemaBody.refine((data) => data.password === 
     message: "Passwords do not match",
     path: ["cPassword"],
     when(payload) {
-        return signUpSchemaBody
-            .pick({ password: true, cPassword: true })
-            .safeParse(payload.value).success
+        return signUpSchemaBody.pick({ password: true, cPassword: true }).safeParse(payload.value).success
     },
 })
 
@@ -34,5 +32,30 @@ export const signInSchema = {
     body: z.object({
         email: z.email(),
         password: z.string().min(6, 'password must be at least 6 characters long'),
+    }).strict()
+}
+
+// verifyEmail Schema
+export const verifyEmailSchema = {
+    body: z.object({
+        email: z.email(),
+        otp: z.string().length(6, 'otp must be 6 digits long'),
+    }).strict()
+}
+
+// forgetPassword Schema
+export const forgetPasswordSchema = {
+    body: z.object({
+        email: z.email(),
+    }).strict()
+}
+
+// resetPassword Schema
+export const resetPasswordSchema = {
+    body: z.object({
+        email: z.email(),
+        otp: z.string().length(6, 'otp must be 6 digits long'),
+        password: z.string().min(6, 'password must be at least 6 characters long'),
+        cPassword: z.string().min(6, 'confirmPassword must be at least 6 characters long'),
     }).strict()
 }

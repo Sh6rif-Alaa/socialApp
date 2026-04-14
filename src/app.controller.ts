@@ -7,7 +7,9 @@ import successResponse from './common/utils/response.success'
 import env from './config/config.service'
 import globalErrorHandler, { AppError } from './common/utils/globalErrorHandler'
 import authRouter from './modules/auth/auth.controller'
+import userRouter from './modules/users/user.controller'
 import { connectDB } from './DB/connectionDB'
+import { redisConnection } from './DB/redis/redis.connect'
 const port = Number(env.PORT)
 
 const app: Application = express()
@@ -25,10 +27,12 @@ const bootstrap = () => {
     app.use(express.json(), helmet(), cors(), limiter)
 
     connectDB()
+    redisConnection()
 
     app.get('/', (_req: Request, res: Response) => { successResponse({ res, message: 'Welcome on SocialMedia App' }) })
 
     app.use('/auth', authRouter)
+    app.use('/user', userRouter)
 
     app.use((req: Request) => { throw new AppError(`Url ${req.originalUrl} with method ${req.method} not found`, 404) })
 

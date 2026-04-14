@@ -1,20 +1,20 @@
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/enum/user.enum";
 
 export interface IUser {
-    _id: Types.ObjectId
     firstName: string
     lastName: string
-    userName: string
+    userName?: string
     email: string
     password: string
     age: number
     confirmed?: boolean
-    phone?: string
-    address?: string
+    phone?: string | undefined
+    address?: string | undefined
     gender: GenderEnum
     role: RoleEnum
     provider: ProviderEnum
+    changeCredential?: Date
     createdAt: Date
     updatedAt: Date
 }
@@ -66,7 +66,8 @@ const userSchema = new mongoose.Schema<IUser>({
     },
     phone: String,
     address: String,
-    confirmed: Boolean
+    confirmed: Boolean,
+    changeCredential: Date
 }, {
     timestamps: true,
     strictQuery: true,
