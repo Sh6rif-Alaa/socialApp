@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=development concurrently \"tsc\" \"node dist/index.js\"",
-    "dev": "cross-env NODE_ENV=development concurrently \"tsc -w\" \"nodemon dist/index.js\""
+    "dev": "cross-env NODE_ENV=development concurrently \"tsc -w\" \"nodemon dist/index.js\"",
+    "prod": "cross-env NODE_ENV=production pm2 start dist/index.js -i 0"
   },
   "keywords": [],
   "author": "",

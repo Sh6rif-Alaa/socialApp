@@ -14,6 +14,10 @@ export interface IUser {
     gender: GenderEnum
     role: RoleEnum
     provider: ProviderEnum
+    profilePicture?: {
+        public_id?: string
+        secure_url: string
+    }
     changeCredential?: Date
     createdAt: Date
     updatedAt: Date
@@ -22,13 +26,17 @@ export interface IUser {
 const userSchema = new mongoose.Schema<IUser>({
     firstName: {
         type: String,
-        required: true,
+        required: function (): boolean {
+            return this.provider === ProviderEnum.google ? false : true
+        },
         minlength: 3,
         maxlength: 25,
     },
     lastName: {
         type: String,
-        required: true,
+        required: function (): boolean {
+            return this.provider === ProviderEnum.google ? false : true
+        },
         minlength: 3,
         maxlength: 25,
     },
@@ -40,12 +48,16 @@ const userSchema = new mongoose.Schema<IUser>({
     },
     password: {
         type: String,
-        required: true,
+        required: function (): boolean {
+            return this.provider === ProviderEnum.google ? false : true
+        },
         minlength: 6,
     },
     age: {
         type: Number,
-        required: true,
+        required: function (): boolean {
+            return this.provider === ProviderEnum.google ? false : true
+        },
         min: 16,
         max: 80
     },
@@ -63,6 +75,10 @@ const userSchema = new mongoose.Schema<IUser>({
         type: String,
         enum: ProviderEnum,
         default: ProviderEnum.system,
+    },
+    profilePicture: {
+        public_id: String,
+        secure_url: String
     },
     phone: String,
     address: String,

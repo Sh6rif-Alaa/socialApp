@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import env from "../../../config/config.service";
 
-export const sendEmail = async (mailOptions: nodemailer.SendMailOptions) => {
+export const sendEmail = async (mailOptions: nodemailer.SendMailOptions): Promise<boolean> => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -11,7 +11,7 @@ export const sendEmail = async (mailOptions: nodemailer.SendMailOptions) => {
     });
 
     const info = await transporter.sendMail({
-        from: `"SarahaApp" ${env.EMAIL}`,
+        from: `"SocialApp" ${env.EMAIL}`,
         ...mailOptions
     });
 

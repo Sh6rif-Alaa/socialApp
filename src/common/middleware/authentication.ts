@@ -1,9 +1,9 @@
-import { verifyToken } from "../utils/token.service"
+import { verifyToken } from "../services/token.service"
 import { NextFunction, Request, Response } from "express"
 import env from "../../config/config.service"
 import UserRepo from "../../DB/repo/user.repo"
 import { AppError } from "../utils/globalErrorHandler"
-import RedisService from "../../DB/redis/redis.service"
+import RedisService from "../services/redis.service"
 import { IUser } from "../../DB/models/user.model"
 import { JwtPayload } from "jsonwebtoken"
 
@@ -33,7 +33,7 @@ class Authentication {
 
         if (user.changeCredential?.getTime()! > decode.iat! * 1000) throw new AppError('invalid all token', 400)
 
-        const revokeToken = await this._redisService.getValue(this._redisService.revokeKey({ userId: user._id as unknown as string, jti: decode.jti as unknown as string }))
+        const revokeToken = await this._redisService.getValue(this._redisService.revokeKey({ userId: user._id, jti: decode.jti as unknown as string }))
 
         if (revokeToken) throw new AppError('invalid token revokeToken', 400)
 

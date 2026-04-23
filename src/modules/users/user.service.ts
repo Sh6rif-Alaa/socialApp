@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import successResponse from "../../common/utils/response.success";
 import { randomUUID } from "node:crypto";
-import { generateToken } from "../../common/utils/token.service";
+import { generateToken } from "../../common/services/token.service";
 import env from "../../config/config.service";
 
 class UserService {

@@ -5,7 +5,6 @@ import authorization from "../../common/middleware/authorization";
 import { RoleEnum } from "../../common/enum/user.enum";
 import env from "../../config/config.service";
 
-console.log(env.REFRESH_TOKEN_KEY)
 const authenticationRefreshToken = new Authentication(env.REFRESH_TOKEN_KEY)
 
 const userRouter = Router({ caseSensitive: true, strict: true })

@@ -7,19 +7,20 @@ import { signUpType, signInType, verifyEmailType, forgetPasswordType, resetPassw
 import UserRepo from "../../DB/repo/user.repo";
 import { generateOTP, sendEmail } from "../../common/utils/email/send.email";
 import { emailTemplate } from "../../common/utils/email/email.template";
-import RedisService from "../../DB/redis/redis.service";
+import RedisService from "../../common/services/redis.service";
 import { eventEmitter } from "../../common/utils/email/email.events";
 import { emailEnum } from "../../common/enum/email.enum";
 import { ProviderEnum } from "../../common/enum/user.enum";
 import { randomUUID } from "node:crypto";
-import { generateToken } from "../../common/utils/token.service";
+import { generateToken } from "../../common/services/token.service";
 import env from "../../config/config.service";
+import { OAuth2Client, TokenPayload } from "google-auth-library";
 
 class AuthService {
     private readonly _userModel = new UserRepo
     constructor() { }
 
-    sendEmailOtp = async ({ email, userName, subject }: { email: string, userName: string | undefined, subject: string }) => {
+    sendEmailOtp = async ({ email, userName, subject }: { email: string, userName: string | undefined, subject: emailEnum }) => {
         const isBlocked = await RedisService.ttl(RedisService.blockedOtpKey({ email, subject }))
         if (isBlocked > 0)
             throw new AppError(`you are blocked, please try again after ${isBlocked} seconds`, 400)
@@ -53,8 +54,8 @@ class AuthService {
                 to: email,
                 subject:
                     subject === emailEnum.forgetPassword
-                        ? "Reset Your Password - SarahaApp"
-                        : "Verify Your Email - SarahaApp",
+                        ? "Reset Your Password - SocialApp"
+                        : "Verify Your Email - SocialApp",
 
                 html: emailTemplate({
                     userName,
@@ -89,7 +90,7 @@ class AuthService {
             payload: { id: user._id },
             secret_key: env.TOKEN_KEY,
             options: {
-                expiresIn: "3m",
+                expiresIn: "15m",
                 jwtid: uuid
             }
         })
@@ -103,7 +104,54 @@ class AuthService {
             }
         })
 
-        successResponse({ res, message: 'user logged in successfully', data: { email, password }, token: { accessToken, refreshToken } })
+        successResponse({ res, message: 'user logged in successfully', token: { accessToken, refreshToken } })
+    }
+
+    signUpWithGmail = async (req: Request, res: Response, _next: NextFunction) => {
+        const { idToken } = req.body as { idToken: string }
+
+        const client = new OAuth2Client();
+
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: env.CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+
+        if (!payload) throw new AppError("Invalid Google token", 401);
+
+        const { email, email_verified, name, picture } = payload as TokenPayload
+
+        let user = await this._userModel.findOne({ filter: { email: email! } })
+
+        if (!user)
+            user = await this._userModel.create({ email: email!, confirmed: email_verified!, userName: name!, profilePicture: { secure_url: picture! }, provider: ProviderEnum.google })
+
+        // login
+        if (user.provider === ProviderEnum.system)
+            throw new AppError('please log in system only', 400)
+        
+        const uuid = randomUUID()
+
+        const accessToken = generateToken({
+            payload: { id: user._id },
+            secret_key: env.TOKEN_KEY,
+            options: {
+                expiresIn: "15m",
+                jwtid: uuid
+            }
+        })
+
+        const refreshToken = generateToken({
+            payload: { id: user._id },
+            secret_key: env.REFRESH_TOKEN_KEY,
+            options: {
+                expiresIn: "1y",
+                jwtid: uuid
+            }
+        })
+        
+        successResponse({ res, token: { accessToken, refreshToken } })
     }
 
     verifyEmail = async (req: Request, res: Response, _next: NextFunction) => {

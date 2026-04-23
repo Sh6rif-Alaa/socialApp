@@ -15,7 +15,8 @@ const env = {
     PREFIX: process.env.PREFIX!,
     EMAIL: process.env.EMAIL!,
     PASSWORD: process.env.PASSWORD!,
-    REDIS_URL: process.env.REDIS_URL!
+    REDIS_URL: process.env.REDIS_URL!,
+    CLIENT_ID: process.env.CLIENT_ID!
 }
 
 export default env

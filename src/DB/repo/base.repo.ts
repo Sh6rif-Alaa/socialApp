@@ -9,7 +9,7 @@ abstract class BaseRepo<TDoc> {
         return this.model.create(data)
     }
 
-    async findById(id: string) {
+    async findById(id: string): Promise<HydratedDocument<TDoc> | null> {
         return this.model.findById(id)
     }
 
@@ -22,7 +22,7 @@ abstract class BaseRepo<TDoc> {
             filter?: QueryFilter<TDoc>,
             projection?: ProjectionType<TDoc> | null | undefined,
             options?: QueryOptions<TDoc>
-        }) {
+        }): Promise<HydratedDocument<TDoc> | null> {
         return this.model.findOne(filter, projection, { ...options })
     }
 
@@ -35,7 +35,7 @@ abstract class BaseRepo<TDoc> {
             filter?: QueryFilter<TDoc>,
             update?: UpdateQuery<TDoc>,
             options?: QueryOptions<TDoc>
-        }) {
+        }): Promise<HydratedDocument<TDoc> | null> {
         return this.model.findOneAndUpdate(filter, update, { ...options })
     }
 }

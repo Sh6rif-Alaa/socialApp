@@ -9,7 +9,8 @@ import globalErrorHandler, { AppError } from './common/utils/globalErrorHandler'
 import authRouter from './modules/auth/auth.controller'
 import userRouter from './modules/users/user.controller'
 import { connectDB } from './DB/connectionDB'
-import { redisConnection } from './DB/redis/redis.connect'
+import redisService from './common/services/redis.service'
+
 const port = Number(env.PORT)
 
 const app: Application = express()
@@ -23,11 +24,11 @@ const limiter = rateLimit({
     },
 })
 
-const bootstrap = () => {
+const bootstrap = async () => {
     app.use(express.json(), helmet(), cors(), limiter)
 
-    connectDB()
-    redisConnection()
+    await connectDB()
+    await redisService.connect()
 
     app.get('/', (_req: Request, res: Response) => { successResponse({ res, message: 'Welcome on SocialMedia App' }) })
 

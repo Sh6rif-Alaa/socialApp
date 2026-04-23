@@ -6,7 +6,7 @@ import { AppError } from "../../common/utils/globalErrorHandler";
 class UserRepo extends BaseRepo<IUser> {
     constructor(protected readonly model: Model<IUser> = userModel) { super(model) }
 
-    async checkUser(email: string) {
+    async checkUser(email: string): Promise<void> {
         const userExist = await this.model.findOne({
             filter: { email },
         })

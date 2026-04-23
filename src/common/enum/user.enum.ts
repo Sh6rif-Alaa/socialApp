@@ -10,5 +10,5 @@ export enum GenderEnum {
 
 export enum ProviderEnum {
     system = 'system',
-    gmail = 'gmail',
+    google = 'google',
 }
