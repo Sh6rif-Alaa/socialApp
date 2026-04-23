@@ -4,15 +4,13 @@ import env from "../../config/config.service"
 import UserRepo from "../../DB/repo/user.repo"
 import { AppError } from "../utils/globalErrorHandler"
 import RedisService from "../services/redis.service"
-import { IUser } from "../../DB/models/user.model"
-import { JwtPayload } from "jsonwebtoken"
 
 class Authentication {
     private readonly _userModel = new UserRepo
     private readonly _redisService = RedisService
     constructor(private readonly secret_key: string) { }
 
-    auth = async (req: Request & { user?: IUser, decode?: JwtPayload }, _res: Response, next: NextFunction) => {
+    auth = async (req: Request , _res: Response, next: NextFunction) => {
         const { authorization } = req.headers
 
         if (!authorization) throw new AppError('no authentication (token)', 404)
