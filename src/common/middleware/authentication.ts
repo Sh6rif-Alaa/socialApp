@@ -19,8 +19,6 @@ class Authentication {
 
         if (prefix !== env.PREFIX) throw new AppError('invalid prefix', 404)
 
-        console.log(this.secret_key)
-
         const decode = verifyToken({ token: token!, secret_key: this.secret_key })
 
         if (!decode || !decode?.id) throw new AppError('invalid token', 400)

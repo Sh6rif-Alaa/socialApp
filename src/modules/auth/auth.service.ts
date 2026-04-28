@@ -12,13 +12,38 @@ import { eventEmitter } from "../../common/utils/email/email.events";
 import { emailEnum } from "../../common/enum/email.enum";
 import { ProviderEnum } from "../../common/enum/user.enum";
 import { randomUUID } from "node:crypto";
-import { generateToken } from "../../common/services/token.service";
+import { generateToken, verifyToken } from "../../common/services/token.service";
 import env from "../../config/config.service";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
+import { Types } from "mongoose";
 
 class AuthService {
     private readonly _userModel = new UserRepo
     constructor() { }
+
+    getTokens = (userId: Types.ObjectId): { accessToken: string, refreshToken: string } => {
+        const uuid = randomUUID()
+
+        const accessToken = generateToken({
+            payload: { id: userId },
+            secret_key: env.TOKEN_KEY,
+            options: {
+                expiresIn: "1d",
+                jwtid: uuid
+            }
+        })
+
+        const refreshToken = generateToken({
+            payload: { id: userId },
+            secret_key: env.REFRESH_TOKEN_KEY,
+            options: {
+                expiresIn: "1y",
+                jwtid: uuid
+            }
+        })
+
+        return { accessToken, refreshToken }
+    }
 
     sendEmailOtp = async ({ email, userName, subject }: { email: string, userName: string | undefined, subject: emailEnum }) => {
         const isBlocked = await RedisService.ttl(RedisService.blockedOtpKey({ email, subject }))
@@ -84,25 +109,7 @@ class AuthService {
         if (!user) throw new AppError('user not exist or not confirmed (check your email)', 404)
         if (!Compare({ plainText: password, hash: user.password })) throw new AppError('invalid password', 401)
 
-        const uuid = randomUUID()
-
-        const accessToken = generateToken({
-            payload: { id: user._id },
-            secret_key: env.TOKEN_KEY,
-            options: {
-                expiresIn: "15m",
-                jwtid: uuid
-            }
-        })
-
-        const refreshToken = generateToken({
-            payload: { id: user._id },
-            secret_key: env.REFRESH_TOKEN_KEY,
-            options: {
-                expiresIn: "1y",
-                jwtid: uuid
-            }
-        })
+        const { accessToken, refreshToken } = this.getTokens(user._id)
 
         successResponse({ res, message: 'user logged in successfully', token: { accessToken, refreshToken } })
     }
@@ -130,28 +137,10 @@ class AuthService {
         // login
         if (user.provider === ProviderEnum.system)
             throw new AppError('please log in system only', 400)
-        
-        const uuid = randomUUID()
 
-        const accessToken = generateToken({
-            payload: { id: user._id },
-            secret_key: env.TOKEN_KEY,
-            options: {
-                expiresIn: "15m",
-                jwtid: uuid
-            }
-        })
+        const { accessToken, refreshToken } = this.getTokens(user._id)
 
-        const refreshToken = generateToken({
-            payload: { id: user._id },
-            secret_key: env.REFRESH_TOKEN_KEY,
-            options: {
-                expiresIn: "1y",
-                jwtid: uuid
-            }
-        })
-        
-        successResponse({ res, token: { accessToken, refreshToken } })
+        successResponse({ res, message: 'user logged in successfully', token: { accessToken, refreshToken } })
     }
 
     verifyEmail = async (req: Request, res: Response, _next: NextFunction) => {
