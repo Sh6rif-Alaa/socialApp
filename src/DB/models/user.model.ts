@@ -100,6 +100,26 @@ userSchema.virtual('userName')
         this.lastName = lastName
     })
 
+// 1
+userSchema.pre('validate', function () {
+    console.log('before validation')
+})
+
+// 2
+userSchema.post('validate', function () {
+    console.log('after validation')
+})
+
+// 3
+userSchema.pre('save', function () {
+    console.log('before saving', this)
+})
+
+// 4
+userSchema.post('save', function () {
+    console.log('after saving', this)
+})
+
 const userModel = mongoose.models.User || mongoose.model<IUser>('User', userSchema)
 
 export default userModel

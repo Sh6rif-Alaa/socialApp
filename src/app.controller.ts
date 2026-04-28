@@ -10,6 +10,7 @@ import authRouter from './modules/auth/auth.controller'
 import userRouter from './modules/users/user.controller'
 import { connectDB } from './DB/connectionDB'
 import redisService from './common/services/redis.service'
+import userModel from './DB/models/user.model'
 
 const port = Number(env.PORT)
 

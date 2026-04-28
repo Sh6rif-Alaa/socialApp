@@ -44,10 +44,16 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "let res = pm.response.json()\r",
-                  "console.log(res)\r",
-                  "pm.environment.set('accessToken',res.token.accessToken)\r",
-                  "pm.environment.set('refreshToken',res.token.refreshToken)"
+                  "let res = pm.response.json();\r",
+                  "console.log(res);\r",
+                  "\r",
+                  "if (res.token) {\r",
+                  "    pm.environment.set('accessToken', res.token.accessToken);\r",
+                  "    pm.environment.set('refreshToken', res.token.refreshToken);\r",
+                  "}\r",
+                  "\r",
+                  "console.log(\"Access:\", pm.environment.get(\"accessToken\"));\r",
+                  "console.log(\"Refresh:\", pm.environment.get(\"refreshToken\"));"
                 ],
                 "type": "text/javascript",
                 "packages": {}
@@ -59,7 +65,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"sherefalex34@gmail.com\",\r\n    \"password\": \"1234567\"\r\n}",
+              "raw": "{\r\n    \"email\": \"sherefalex34@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -113,7 +119,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"sherefalex34@gmail.com\",\r\n    \"otp\": \"317466\"\r\n}",
+              "raw": "{\r\n    \"email\": \"sherefalex34@gmail.com\",\r\n    \"otp\": \"971151m\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -193,7 +199,143 @@
       "name": "user",
       "item": [
         {
+          "name": "getMyProfile",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "name": "cache-control",
+                "sortOrder": 2,
+                "infoTitle": "We recommend using this header",
+                "info": "Postman added \"Cache-Control: no-cache\" as a precautionary measure to prevent the server from returning stale response when one makes repeated requests.\n\nYou can remove this header in the app settings or enter a new one with a different value.",
+                "allowedToToggle": false,
+                "disableEdit": true,
+                "previewSettingsLink": "Go to settings",
+                "key": "Cache-Control",
+                "value": "no-cache",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "postman-token",
+                "sortOrder": 3,
+                "infoTitle": "We recommend using this header",
+                "info": "The Postman-Token header appends a random UUID to every outgoing request. Postman adds this header for API developers to better debug requests sent and to ensure separate requests appear distinct to the receiving server.\n\nYou can remove this header in the app settings.",
+                "allowedToToggle": false,
+                "disableEdit": true,
+                "previewSettingsLink": "Go to settings",
+                "key": "Postman-Token",
+                "value": "<calculated when request is sent>",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "host",
+                "sortOrder": 6,
+                "infoTitle": "We recommend using this header",
+                "info": "The Host header is added to identify the domain name for which a request is being sent to the server. This header is implicitly sent by every HTTP client.\n\nYou can remove the header or enter a new one with a different value. It is most likely that without this header, your request will return an HTTP 400 error.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "Host",
+                "value": "<calculated when request is sent>",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "user-agent",
+                "sortOrder": 7,
+                "infoTitle": "We recommend using this header",
+                "info": "The User-Agent header is added to help the server identify Postman as the HTTP requesting application or client.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "User-Agent",
+                "value": "PostmanRuntime/7.39.1",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "accept",
+                "sortOrder": 8,
+                "infoTitle": "We recommend using this header",
+                "info": "The \"Accept: */*\" header is added to tell the server that Postman can understand and process all forms of response content types.\n\nIt is recommended that this header be sent, but you can remove the header or enter a new one with a different value.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "Accept",
+                "value": "*/*",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "accept-encoding",
+                "sortOrder": 9,
+                "infoTitle": "We recommend using this header",
+                "info": "The Accept-Encoding header is added to indicate to the server that Postman HTTP client supports a defined list of content-encoding or compression algorithms as response.\n\nYou can remove the header or enter a new one with a different value. Doing that may not accurately render the response within the app.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "Accept-Encoding",
+                "value": "gzip, deflate, br",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "name": "connection",
+                "sortOrder": 10,
+                "infoTitle": "We recommend using this header",
+                "info": "Postman added the Connection header to indicate the server to keep the underlying network connection open once the current response is received. This allows Postman to reuse the same connection for faster response times in subsequent requests to the same server.\n\nYou can remove this header or enter a new one with a different value, such as `Connection: Close` to control this behaviour.",
+                "allowedToToggle": true,
+                "disableEdit": true,
+                "key": "Connection",
+                "value": "keep-alive",
+                "system": true,
+                "type": "text"
+              },
+              {
+                "key": "authorization",
+                "value": "{{prefix}}{{accessToken}}",
+                "type": "text",
+                "id": 0
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_url}}/user/getMyProfile",
+              "host": [
+                "{{local_url}}"
+              ],
+              "path": [
+                "user",
+                "getMyProfile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "refreshToken",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let res = pm.response.json()\r",
+                  "pm.environment.set('accessToken',res.token)"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -298,7 +440,7 @@
               },
               {
                 "key": "authorization",
-                "value": "Bearer {{refreshToken}}",
+                "value": "{{prefix}}{{refreshToken}}",
                 "type": "text",
                 "id": 0
               }

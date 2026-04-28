@@ -12,7 +12,7 @@ import { eventEmitter } from "../../common/utils/email/email.events";
 import { emailEnum } from "../../common/enum/email.enum";
 import { ProviderEnum } from "../../common/enum/user.enum";
 import { randomUUID } from "node:crypto";
-import { generateToken, verifyToken } from "../../common/services/token.service";
+import { generateToken } from "../../common/services/token.service";
 import env from "../../config/config.service";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import { Types } from "mongoose";
