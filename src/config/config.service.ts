@@ -16,7 +16,11 @@ const env = {
     EMAIL: process.env.EMAIL!,
     PASSWORD: process.env.PASSWORD!,
     REDIS_URL: process.env.REDIS_URL!,
-    CLIENT_ID: process.env.CLIENT_ID!
+    CLIENT_ID: process.env.CLIENT_ID!,
+    AWS_REGION: process.env.AWS_REGION!,
+    AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME!,
+    AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY!,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY!
 }
 
 export default env

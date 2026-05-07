@@ -21,6 +21,7 @@ export interface IUser {
     changeCredential?: Date
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -83,10 +84,11 @@ const userSchema = new mongoose.Schema<IUser>({
     phone: String,
     address: String,
     confirmed: Boolean,
-    changeCredential: Date
+    changeCredential: Date,
+    deletedAt: Date
 }, {
     timestamps: true,
-    strictQuery: true,
+    strictQuery: false,
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 })
@@ -100,26 +102,36 @@ userSchema.virtual('userName')
         this.lastName = lastName
     })
 
-// 1
-userSchema.pre('validate', function () {
-    console.log('before validation')
+// // 1
+// userSchema.pre('validate', function () {
+//     console.log('before validation')
+// })
+
+// // 2
+// userSchema.post('validate', function () {
+//     console.log('after validation')
+// })
+
+// // 3
+// userSchema.pre('save', function () {
+//     console.log('before saving', this)
+// })
+
+// // 4
+// userSchema.post('save', function () {
+//     console.log('after saving', this)
+// })
+
+userSchema.pre('findOne', function () {
+    console.log('befor findOne')
+    const { paranoid, ...rest } = this.getQuery() as Partial<IUser> & { paranoid?: boolean }
+    if (paranoid === false)
+        this.setQuery(rest as any)
+    else
+        this.setQuery({ ...rest, deletedAt: { $exists: false } } as any)
 })
 
-// 2
-userSchema.post('validate', function () {
-    console.log('after validation')
-})
-
-// 3
-userSchema.pre('save', function () {
-    console.log('before saving', this)
-})
-
-// 4
-userSchema.post('save', function () {
-    console.log('after saving', this)
-})
-
-const userModel = mongoose.models.User || mongoose.model<IUser>('User', userSchema)
+// const userModel = mongoose.models.User || mongoose.model<IUser>('User', userSchema)
+const userModel = (mongoose.models.User || mongoose.model<IUser>('User', userSchema)) as mongoose.Model<IUser>
 
 export default userModel
