@@ -151,6 +151,31 @@ class RedisService {
             throw new AppError('Error incrementing value', 500);
         }
     }
+
+    private FCMKey(userId: Types.ObjectId) {
+        return `fcm::${userId}`
+    }
+
+    async addFCMToken(userId: Types.ObjectId, fcmToken: string) {
+        return await this.client.sAdd(this.FCMKey(userId), fcmToken);
+    }
+
+    async removeFCMToken(userId: Types.ObjectId, fcmToken: string) {
+        return await this.client.sRem(this.FCMKey(userId), fcmToken);
+    }
+
+    async getFCMs(userId: Types.ObjectId): Promise<string[]> {
+        return await this.client.sMembers(this.FCMKey(userId));
+    }
+
+    async hasFCMToken(userId: Types.ObjectId) {
+        return await this.client.sCard(this.FCMKey(userId));
+    }
+
+    async removeFCMUser(userId: Types.ObjectId) {
+        return await this.client.del(this.FCMKey(userId));
+    }
+
 }
 
 export default new RedisService

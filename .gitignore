@@ -61,6 +61,7 @@ jspm_packages/
 # Nuxt.js build / generate output
 .nuxt
 dist/
+secretfirebase.json
 
 # Serverless directories
 .serverless/

@@ -10,11 +10,12 @@ import authRouter from './modules/auth/auth.controller'
 import userRouter from './modules/users/user.controller'
 import { connectDB } from './DB/connectionDB'
 import redisService from './common/services/redis.service'
-import userModel from './DB/models/user.model'
 import { multer_cloud } from './common/middleware/multer.cloud'
 import s3Service from './common/services/s3.service'
 import { FileType, StorageEnum } from './common/enum/multer_enum'
 import { pipeline } from 'node:stream/promises'
+import NotificationService from './common/services/notification.service'
+import postRouter from './modules/posts/post.controller'
 
 const port = Number(env.PORT)
 
@@ -39,6 +40,7 @@ const bootstrap = async () => {
 
     app.use('/auth', authRouter)
     app.use('/user', userRouter)
+    app.use('/post', postRouter)
 
     app.get("/upload/pre-signed/*path", async (req: Request, res: Response, _next: NextFunction) => {
         const { path } = req.params as { path: string[] };
@@ -79,6 +81,16 @@ const bootstrap = async () => {
         successResponse({ res, message: 'uploaded successfully', data: { file } })
     })
 
+    app.post('/send-notification', async (req: Request, res: Response, _next: NextFunction) => {
+        await NotificationService.sendNotification({
+            token: req.body.token,
+            data: {
+                title: 'hi',
+                body: 'how are you?'
+            }
+        })
+        successResponse({ res, message: 'notification sent successfully' })
+    })
 
     app.use((req: Request) => { throw new AppError(`Url ${req.originalUrl} with method ${req.method} not found`, 404) })
 

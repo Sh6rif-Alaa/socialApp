@@ -10,6 +10,8 @@ const validation = (Schema: SchemaType) => {
         const errorResult = []
         for (const key of Object.keys(Schema) as ReqType[]) {
             if (!Schema[key]) continue
+            if (req.file) { req.body.attachment = req.file }
+            if (req.files) { req.body.attachments = req.files }
             const { success, error } = Schema[key].safeParse(req[key]);
 
             if (!success) {

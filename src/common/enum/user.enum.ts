@@ -12,3 +12,9 @@ export enum ProviderEnum {
     system = 'system',
     google = 'google',
 }
+
+export enum FriendStatus {
+    pending = 'pending',
+    accepted = 'accepted',
+    rejected = 'rejected'
+}

@@ -16,9 +16,12 @@ import { generateToken } from "../../common/services/token.service";
 import env from "../../config/config.service";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import { Types } from "mongoose";
+import NotificationService from "../../common/services/notification.service";
 
 class AuthService {
     private readonly _userModel = new UserRepo
+    private readonly _redisService = RedisService
+    private readonly _notificationService = NotificationService
     constructor() { }
 
     getTokens = (userId: Types.ObjectId): { accessToken: string, refreshToken: string } => {
@@ -46,33 +49,33 @@ class AuthService {
     }
 
     sendEmailOtp = async ({ email, userName, subject }: { email: string, userName: string | undefined, subject: emailEnum }) => {
-        const isBlocked = await RedisService.ttl(RedisService.blockedOtpKey({ email, subject }))
+        const isBlocked = await this._redisService.ttl(this._redisService.blockedOtpKey({ email, subject }))
         if (isBlocked > 0)
             throw new AppError(`you are blocked, please try again after ${isBlocked} seconds`, 400)
 
-        const otpTtl = await RedisService.ttl(RedisService.otpKey({ email, subject }))
+        const otpTtl = await this._redisService.ttl(this._redisService.otpKey({ email, subject }))
         if (otpTtl > 0)
             throw new AppError("you already have an active otp, please wait until it expires", 400)
 
-        const otpTrials = Number(await RedisService.getValue(RedisService.maxOtpKey({ email, subject }))) || 0
+        const otpTrials = Number(await this._redisService.getValue(this._redisService.maxOtpKey({ email, subject }))) || 0
 
         if (otpTrials >= 3) {
-            await RedisService.setValue({ key: RedisService.blockedOtpKey({ email, subject }), value: 1, ttl: 60 * 15 })
+            await this._redisService.setValue({ key: this._redisService.blockedOtpKey({ email, subject }), value: 1, ttl: 60 * 15 })
             throw new AppError("you exceeded maximum number of otp requests", 400)
         }
 
         const OTP = await generateOTP()
 
-        await RedisService.setValue({
-            key: RedisService.otpKey({ email, subject }),
+        await this._redisService.setValue({
+            key: this._redisService.otpKey({ email, subject }),
             value: Hash({ plainText: `${OTP}` }),
             ttl: 60 * 5
         })
 
-        await RedisService.incr(RedisService.maxOtpKey({ email, subject }))
+        await this._redisService.incr(this._redisService.maxOtpKey({ email, subject }))
 
         if (otpTrials === 0)
-            await RedisService.expire({ key: RedisService.maxOtpKey({ email, subject }), ttl: 60 * 15 })
+            await this._redisService.expire({ key: this._redisService.maxOtpKey({ email, subject }), ttl: 60 * 15 })
 
         eventEmitter.emit("confirmEmail", async () => {
             await sendEmail({
@@ -104,12 +107,18 @@ class AuthService {
     }
 
     signIn = async (req: Request, res: Response, _next: NextFunction) => {
-        const { email, password }: signInType = req.body
+        const { email, password, fcmToken }: signInType = req.body
         const user = await this._userModel.findOne({ filter: { email, confirmed: { $exists: true }, provider: ProviderEnum.system } })
         if (!user) throw new AppError('user not exist or not confirmed (check your email)', 404)
         if (!Compare({ plainText: password, hash: user.password })) throw new AppError('invalid password', 401)
 
         const { accessToken, refreshToken } = this.getTokens(user._id)
+
+        if (fcmToken) {
+            await this._redisService.addFCMToken(user._id, fcmToken)
+            const tokens = await this._redisService.getFCMs(user._id)
+            await this._notificationService.sendNotifications({ tokens, data: { title: 'Welcome to SocialApp', body: `You logged in successfully at  ${new Date().toLocaleString()}` } })
+        }
 
         successResponse({ res, message: 'user logged in successfully', token: { accessToken, refreshToken } })
     }
@@ -146,8 +155,8 @@ class AuthService {
     verifyEmail = async (req: Request, res: Response, _next: NextFunction) => {
         const { email, otp }: verifyEmailType = req.body
 
-        const otpDb = await RedisService.getValue(
-            RedisService.otpKey({ email, subject: emailEnum.confirmEmail })
+        const otpDb = await this._redisService.getValue(
+            this._redisService.otpKey({ email, subject: emailEnum.confirmEmail })
         )
 
         if (!otpDb) throw new AppError("otp expired or not found", 400)
@@ -162,10 +171,10 @@ class AuthService {
 
         if (!user) throw new AppError("user not exist", 404)
 
-        await RedisService.del([
-            RedisService.otpKey({ email, subject: emailEnum.confirmEmail }),
-            RedisService.maxOtpKey({ email, subject: emailEnum.confirmEmail }),
-            RedisService.blockedOtpKey({ email, subject: emailEnum.confirmEmail })
+        await this._redisService.del([
+            this._redisService.otpKey({ email, subject: emailEnum.confirmEmail }),
+            this._redisService.maxOtpKey({ email, subject: emailEnum.confirmEmail }),
+            this._redisService.blockedOtpKey({ email, subject: emailEnum.confirmEmail })
         ])
 
         successResponse({ res, message: "email verified successfully" })

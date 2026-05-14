@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/enum/user.enum";
+import { FriendStatus, GenderEnum, ProviderEnum, RoleEnum } from "../../common/enum/user.enum";
+import { Types } from "mongoose";
 
 export interface IUser {
     firstName: string
@@ -18,6 +19,10 @@ export interface IUser {
         public_id?: string
         secure_url: string
     }
+    friends: {
+        user: Types.ObjectId,
+        status: FriendStatus
+    }[]
     changeCredential?: Date
     createdAt: Date
     updatedAt: Date
@@ -80,6 +85,20 @@ const userSchema = new mongoose.Schema<IUser>({
     profilePicture: {
         public_id: String,
         secure_url: String
+    },
+    friends: {
+        type: [{
+            user: {
+                type: Types.ObjectId,
+                ref: 'User'
+            },
+            status: {
+                type: String,
+                enum: FriendStatus,
+                default: FriendStatus.pending
+            }
+        }],
+        default: []
     },
     phone: String,
     address: String,

@@ -1,12 +1,8 @@
 import { z } from "zod";
-import { forgetPasswordSchema, resetPasswordSchema, signInSchema, signUpSchemaBody, verifyEmailSchema } from "./post.validation";
+import { createPostSchema, getPostsSchema, likePostSchema, updatePostSchema } from "./post.validation";
 
-export type signUpType = z.infer<typeof signUpSchemaBody>
-
-export type signInType = z.infer<typeof signInSchema.body>
-
-export type verifyEmailType = z.infer<typeof verifyEmailSchema.body>
-
-export type forgetPasswordType = z.infer<typeof forgetPasswordSchema.body>
-
-export type resetPasswordType = z.infer<typeof resetPasswordSchema.body>
+export type createPostType = z.infer<typeof createPostSchema.body>
+export type getPostsQueryType = z.infer<typeof getPostsSchema.query>
+export type likePostParamsType = z.infer<typeof likePostSchema.params>
+export type updatePostParamsType = z.infer<typeof updatePostSchema.params>
+export type updatePostBodyType = z.infer<typeof updatePostSchema.body>
