@@ -30,6 +30,12 @@ const postSchema = new mongoose.Schema<IPost>({
     strictQuery: true
 })
 
+postSchema.virtual('comments', {
+    ref: 'Comment',
+    localField: '_id',
+    foreignField: 'refId'
+})
+
 const postModel = (mongoose.models.post || mongoose.model<IPost>('Post', postSchema)) as mongoose.Model<IPost>
 
 export default postModel

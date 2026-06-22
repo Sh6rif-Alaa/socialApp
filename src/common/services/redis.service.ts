@@ -58,6 +58,10 @@ class RedisService {
         return `otp_blocked::${subject}::${email}`;
     }
 
+    socketIoKey(userId: Types.ObjectId) {
+        return `socketIo::${userId}`
+    }
+
     // Methods
     async setValue({ key, value, ttl }: SetValueParams) {
         try {
@@ -174,6 +178,27 @@ class RedisService {
 
     async removeFCMUser(userId: Types.ObjectId) {
         return await this.client.del(this.FCMKey(userId));
+    }
+
+    // User Socket Methods
+    async storeUserSocket({ userId, socketId }: { userId: Types.ObjectId, socketId: string }) {
+        await this.client.sAdd(this.socketIoKey(userId), socketId);
+    }
+
+    async getUserSocket(userId: Types.ObjectId) {
+        return await this.client.sMembers(this.socketIoKey(userId));
+    }
+
+    async getAllUserSockets(userId: Types.ObjectId) {
+        return await this.client.sMembers(this.socketIoKey(userId))
+    }
+
+    async removeUserSocket({ userId, socketId }: { userId: Types.ObjectId, socketId: string }) {
+        return await this.client.sRem(this.socketIoKey(userId), socketId);
+    }
+
+    async hasSocketUser(userId: Types.ObjectId) {
+        return await this.exists(this.socketIoKey(userId));
     }
 
 }

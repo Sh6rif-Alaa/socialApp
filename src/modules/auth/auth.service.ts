@@ -19,7 +19,7 @@ import { Types } from "mongoose";
 import NotificationService from "../../common/services/notification.service";
 
 class AuthService {
-    private readonly _userModel = new UserRepo
+    private readonly _userModel = UserRepo
     private readonly _redisService = RedisService
     private readonly _notificationService = NotificationService
     constructor() { }
@@ -107,18 +107,18 @@ class AuthService {
     }
 
     signIn = async (req: Request, res: Response, _next: NextFunction) => {
-        const { email, password, fcmToken }: signInType = req.body
+        const { email, password }: signInType = req.body
         const user = await this._userModel.findOne({ filter: { email, confirmed: { $exists: true }, provider: ProviderEnum.system } })
         if (!user) throw new AppError('user not exist or not confirmed (check your email)', 404)
         if (!Compare({ plainText: password, hash: user.password })) throw new AppError('invalid password', 401)
 
         const { accessToken, refreshToken } = this.getTokens(user._id)
 
-        if (fcmToken) {
-            await this._redisService.addFCMToken(user._id, fcmToken)
-            const tokens = await this._redisService.getFCMs(user._id)
-            await this._notificationService.sendNotifications({ tokens, data: { title: 'Welcome to SocialApp', body: `You logged in successfully at  ${new Date().toLocaleString()}` } })
-        }
+        // if (fcmToken) {
+        //     await this._redisService.addFCMToken(user._id, fcmToken)
+        //     const tokens = await this._redisService.getFCMs(user._id)
+        //     await this._notificationService.sendNotifications({ tokens, data: { title: 'Welcome to SocialApp', body: `You logged in successfully at  ${new Date().toLocaleString()}` } })
+        // }
 
         successResponse({ res, message: 'user logged in successfully', token: { accessToken, refreshToken } })
     }

@@ -8,10 +8,13 @@ import Authentication from "../../common/middleware/authentication";
 import env from "../../config/config.service";
 import authorization from "../../common/middleware/authorization";
 import { RoleEnum } from "../../common/enum/user.enum";
+import CommentRouter from "../comments/comment.controller";
 
 const postRouter = Router({ caseSensitive: true, strict: true })
 
 const authenticationUser = new Authentication(env.TOKEN_KEY)
+
+postRouter.use('/:postId/comments{/:commentId/replies}', CommentRouter)
 
 postRouter.post('/',
     authenticationUser.auth,

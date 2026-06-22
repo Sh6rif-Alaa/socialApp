@@ -1,5 +1,4 @@
-import { QueryOptions, UpdateQuery } from "mongoose";
-import { HydratedDocument, ProjectionType, QueryFilter } from "mongoose";
+import { HydratedDocument, ProjectionType, QueryFilter, QueryOptions, UpdateQuery } from "mongoose";
 import { Model } from "mongoose";
 
 export interface PaginationResult<TDoc> {
@@ -79,7 +78,11 @@ abstract class BaseRepo<TDoc> {
             update?: UpdateQuery<TDoc>,
             options?: QueryOptions<TDoc>
         }): Promise<HydratedDocument<TDoc> | null> {
-        return this.model.findOneAndUpdate(filter, update, { ...options })
+        return this.model.findOneAndUpdate(filter, update, { returnDocument: 'after', ...options })
+    }
+
+    async findByIdAndDelete(id: string): Promise<HydratedDocument<TDoc> | null> {
+        return this.model.findByIdAndDelete(id)
     }
 }
 

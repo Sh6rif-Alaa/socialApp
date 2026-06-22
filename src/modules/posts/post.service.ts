@@ -13,8 +13,8 @@ import { availabilityEnum } from "../../common/enum/post.enum";
 
 
 class PostService {
-    private readonly _postModel = new PostRepo
-    private readonly _userModel = new UserRepo()
+    private readonly _postModel = PostRepo
+    private readonly _userModel = UserRepo
     private readonly _redisService = RedisService
     private readonly _notificationService = NotificationService
     private readonly _s3Service = S3Service
@@ -91,9 +91,16 @@ class PostService {
         const posts = await this._postModel.findPaginated(
             {
                 filter: visibilityFilter as any,
-                options: { sort: { createdAt: -1 } },
                 page,
-                limit
+                limit,
+                options: {
+                    sort: { createdAt: -1 },
+                    populate: [
+                        {
+                            path: "comments"
+                        }
+                    ]
+                }
             }
         )
 

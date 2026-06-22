@@ -7,3 +7,8 @@ export enum availabilityEnum {
     onlyMe = 'onlyMe',
     friends = 'friends'
 }
+
+export enum modelStatusEnem {
+    post = 'post',
+    comment = 'comment'
+}
